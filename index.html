@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Index VD+ LSR</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: outil en colonne — bandeau titre, graphique + réglages côte à côte, puis cartes terrain, calculateur, calibration, import, prompt */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --fg:#1b2127; --muted:#5d6873; --line:#dde2e7;
+  --accent:#d9661a; --point:#4b3fa8;
+  --z-gris:#6b7078; --z-rouge:#ef9a9a; --z-bleu:#93c4f0; --z-vert:#93e0b2; --z-blanc:#ffffff;
+  --z-blanc-ink:#7a8088;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#14181c; --surface:#1d2227; --fg:#e8ecef; --muted:#9aa5af; --line:#2f363d;
+  --accent:#f08a3e; --point:#a99cff;
+  --z-gris:#555a60; --z-rouge:#b85a5a; --z-bleu:#4f86b8; --z-vert:#4a9e6c; --z-blanc:#f2f4f6; --z-blanc-ink:#c9cdd1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14181c; --surface:#1d2227; --fg:#e8ecef; --muted:#9aa5af; --line:#2f363d;
+  --accent:#f08a3e; --point:#a99cff;
+  --z-gris:#555a60; --z-rouge:#b85a5a; --z-bleu:#4f86b8; --z-vert:#4a9e6c; --z-blanc:#f2f4f6; --z-blanc-ink:#c9cdd1;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;letter-spacing:.01em;margin:0;text-wrap:balance}
+h1{font-size:2.3rem;line-height:1.05;text-transform:uppercase}
+h2{font-size:1.35rem;text-transform:uppercase}
+.eyebrow{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+p{margin:0}
+.lede{color:var(--muted);max-width:68ch}
+.formula{font-family:var(--f-display);font-size:1.15rem;font-weight:600;color:var(--fg)}
+.formula b{color:var(--accent)}
+header{display:flex;flex-direction:column;gap:8px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.grid-main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px}
+@media (max-width:860px){.grid-main{grid-template-columns:1fr}}
+.chart-box{position:relative;height:460px}
+@media (max-width:600px){.chart-box{height:340px}}
+.ctl{display:flex;flex-direction:column;gap:4px}
+.ctl label{font-weight:600;font-size:.9rem;display:flex;justify-content:space-between;gap:8px}
+.ctl label output{font-family:var(--f-display);font-size:1.05rem;color:var(--accent);font-variant-numeric:tabular-nums}
+.ctl small{color:var(--muted);font-size:.8rem;line-height:1.35}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.checks{display:flex;flex-direction:column;gap:6px}
+.checks label{display:flex;gap:8px;align-items:center;font-size:.92rem}
+.checks .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-left:auto}
+input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+.seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{flex:1;border:0;background:transparent;color:var(--fg);font:inherit;font-size:.88rem;padding:6px 8px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--fg);color:var(--bg)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.terrains{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.terrains{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.tcard .tname{font-family:var(--f-display);font-size:1.25rem;font-weight:700;text-transform:uppercase}
+.tcard .range{font-size:.8rem;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;min-height:30px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:.9rem;padding:3px 10px 3px 4px;border-radius:999px;border:1px solid var(--line)}
+.chip i{width:20px;height:20px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.15)}
+.tcard .val{font-variant-numeric:tabular-nums;font-size:.85rem;color:var(--muted)}
+.warn{font-size:.78rem;color:var(--accent)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:860px){.two{grid-template-columns:1fr}}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px}
+.field span{font-size:.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+input[type=number]{font:inherit;font-size:1.1rem;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--fg);width:100%;font-variant-numeric:tabular-nums}
+.vdplus{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vdplus div{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.vdplus span{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.vdplus b{font-family:var(--f-display);font-size:2rem;line-height:1.05;font-variant-numeric:tabular-nums}
+.vdplus small{color:var(--muted);font-size:.8rem}
+.result{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:12px}
+.big{font-family:var(--f-display);font-size:1.6rem;font-weight:700;line-height:1.1}
+.muted{color:var(--muted)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-variant-numeric:tabular-nums;font-size:.92rem}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-weight:600}
+.btn{font:inherit;font-weight:600;font-size:.9rem;border:1px solid var(--fg);background:var(--fg);color:var(--bg);border-radius:7px;padding:8px 14px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--fg)}
+.import{border-color:var(--accent)}
+.steps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px;max-width:75ch}
+.steps a{color:var(--accent)}
+input[type=text]{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--fg);width:100%}
+.drop{border:1.5px dashed var(--line);border-radius:10px;padding:16px;text-align:center;color:var(--muted);font-size:.9rem}
+.drop.over{border-color:var(--accent);color:var(--fg)}
+pre.prompt{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:.85rem;margin:0;max-height:300px;overflow:auto}
+.tbl-wrap{overflow-x:auto;max-height:420px;overflow-y:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:.85rem;font-variant-numeric:tabular-nums}
+th,td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{position:sticky;top:0;background:var(--surface);font-weight:600;color:var(--muted);text-transform:uppercase;font-size:.72rem;letter-spacing:.06em}
+td:nth-child(2),th:nth-child(2),td:first-child,th:first-child{text-align:left}
+td.nm{max-width:240px;overflow:hidden;text-overflow:ellipsis}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle;border:1px solid rgba(0,0,0,.15)}
+details summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:1.2rem;text-transform:uppercase}
+.src{font-size:.8rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Sorties LSR · groupes de niveau</span>
+    <h1>Index VD+ LSR<span id="who"></span></h1>
+    <p class="lede">Charge ton historique Strava : chaque sortie vélo devient un point sur les zones de couleur LSR. Ta courbe te dit quel groupe choisir sur chaque type de terrain, et ton VD+ résume ton niveau en deux chiffres.</p>
+  </header>
+
+  <section class="panel import" id="importPanel">
+    <h2>Charge ton historique Strava</h2>
+    <ol class="steps">
+      <li>Sur <a href="https://www.strava.com/athlete/delete_your_account" target="_blank" rel="noopener">strava.com › Paramètres › Mon compte</a>, clique sur <b>Télécharger ou supprimer votre compte</b>, puis <b>Demander une archive</b>.</li>
+      <li>Strava t'envoie un lien par e-mail, en général en quelques heures. Télécharge le fichier .zip et décompresse-le.</li>
+      <li>Dépose ici le fichier <b>activities.csv</b> qui se trouve à la racine de l'archive.</li>
+    </ol>
+    <div class="drop" id="drop">
+      <p><b>Glisse activities.csv ici</b> ou choisis-le :</p>
+      <p><input type="file" id="file" accept=".csv,text/csv"></p>
+    </div>
+    <div class="row">
+      <label class="field"><span>Ton prénom (facultatif)</span><input type="text" id="rider" placeholder="Vincent"></label>
+      <button class="btn ghost" type="button" id="reset" hidden>Effacer mes sorties</button>
+    </div>
+    <p class="src" id="importMsg">Le fichier est lu dans ton navigateur. Rien n'est envoyé ni enregistré : si tu fermes la page, tes sorties disparaissent.</p>
+  </section>
+
+  <section class="grid-main">
+    <div class="panel">
+      <div class="chart-box"><canvas id="chart" aria-label="Vitesse des sorties en fonction de la pente moyenne"></canvas></div>
+      <p class="src" id="summary"></p>
+    </div>
+    <aside class="panel" aria-label="Réglages">
+      <h2>Réglages</h2>
+      <div class="ctl">
+        <label>Temps utilisé</label>
+        <div class="seg" role="group" aria-label="Temps utilisé">
+          <button type="button" id="tMoving" aria-pressed="true">En mouvement</button>
+          <button type="button" id="tElapsed" aria-pressed="false">Total</button>
+        </div>
+      </div>
+      <div class="ctl">
+        <label>Sorties prises en compte</label>
+        <div class="checks" id="types"></div>
+      </div>
+      <div class="ctl">
+        <small>Les sorties de plus de 3,5 % de pente moyenne sont écartées : trop spécifiques pour situer un niveau.</small>
+      </div>
+      <div class="ctl">
+        <label for="minKm">Distance minimale <output id="minKmOut">20 km</output></label>
+        <input type="range" id="minKm" min="10" max="80" step="5" value="20">
+      </div>
+    </aside>
+  </section>
+
+  <section class="panel">
+    <h2>Ta couleur selon le terrain</h2>
+    <p class="muted">Lue sur ta courbe au milieu de chaque terrain. Deux pastilles : tu es à la frontière entre deux groupes, à moduler selon l'envie du jour.</p>
+    <div class="terrains" id="terrains"></div>
+  </section>
+
+  <section class="two">
+    <div class="panel">
+      <h2>Quel groupe pour cette sortie ?</h2>
+      <p class="muted">Entre le profil de la sortie LSR annoncée.</p>
+      <div class="row">
+        <label class="field"><span>Distance (km)</span><input type="number" id="pKm" value="90" min="1" step="1"></label>
+        <label class="field"><span>D+ (m)</span><input type="number" id="pDp" value="1200" min="0" step="10"></label>
+      </div>
+      <div class="result" id="planOut"></div>
+    </div>
+    <div class="panel">
+      <h2>Ton VD+</h2>
+      <p class="muted">Droite de régression linéaire de ta vitesse en fonction de la pente. Le <b>VD+</b> est ta vitesse à 0 % de pente. Le <b>coefficient VD+</b> est la pente de la droite : ce que tu perds en km/h par point de pente.</p>
+      <div class="vdplus" id="vdplus"></div>
+      <dl class="kv" id="calib"></dl>
+      <div class="row"><button class="btn" type="button" id="copyStats" hidden>Copier mes chiffres</button><span class="src" id="copyStatsMsg"></span></div>
+    </div>
+  </section>
+
+  <section class="two">
+    <div class="panel">
+      <h2>Pas d'archive sous la main ?</h2>
+      <p class="muted">Si tu utilises Claude avec le connecteur Strava, ce prompt donne ton VD+ et tes couleurs sans passer par l'archive.</p>
+    </div>
+    <div class="panel">
+      <h2>Le prompt Strava</h2>
+            <pre class="prompt" id="prompt">Connecte-toi à mon Strava et récupère mes sorties vélo (Ride, pas les sorties virtuelles) des 12 derniers mois, de plus de 20 km.
+
+Pour chaque sortie, calcule avec le temps en mouvement :
+- V = distance (km) / temps (h)
+- pente moyenne = D+ / distance, en %
+Écarte les sorties de plus de 3,5 % de pente moyenne.
+
+1. Trace V en fonction de la pente moyenne, avec une régression polynomiale d'ordre 2 (mon profil).
+2. Calcule la régression linéaire de V en fonction de la pente : l'ordonnée à l'origine est mon VD+ (vitesse à 0 %), la pente de la droite est mon coefficient VD+ (km/h par % de pente).
+
+Zones de couleur LSR, vitesse à 0 % : Gris 35 à 39, Rouge 31 à 35, Bleu 27 à 31, Vert 23 à 27, Blanc 19 à 23.
+Elles décroissent avec la pente : V(pente) = V(0) / (1 + 15 × pente), pente en décimal (3,5 % = 0,035).
+
+Terrains : Plat &lt; 0,5 %, Vallonné 0,5 à 1,5 %, Escarpé 1,5 à 2,5 %, Abrupte 2,5 à 3,5 %.
+
+Donne-moi mon VD+, mon coefficient VD+, et ma couleur sur chaque terrain lue sur ma courbe polynomiale (deux couleurs si je suis à moins de 20 % d'une frontière).</pre>
+      <div class="row"><button class="btn" type="button" id="copy">Copier le prompt</button><span class="src" id="copyMsg"></span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <details>
+      <summary>Détail des sorties</summary>
+      <div class="tbl-wrap" style="margin-top:12px">
+        <table><thead><tr><th>Date</th><th>Sortie</th><th>km</th><th>D+</th><th>Pente</th><th>Vitesse</th><th>Zone</th></tr></thead><tbody id="tbody"></tbody></table>
+      </div>
+    </details>
+  </section>
+
+  <p class="src">Zones LSR : vitesse sur le plat de 39, 35, 31, 27, 23 et 19 km/h, qui décroît avec la pente selon V(pente) = V(0) / (1 + 15 × pente), la pente étant exprimée en décimal (3,5 % = 0,035). Prototype, pas encore calibré sur le club.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+
+const TYPES={r:"Sorties vélo",u:"Trajets marqués « Commute »"};
+const ZONES=[{n:"Gris",v:"--z-gris"},{n:"Rouge",v:"--z-rouge"},{n:"Bleu",v:"--z-bleu"},{n:"Vert",v:"--z-vert"},{n:"Blanc",v:"--z-blanc"}];
+const GMAX=3.5; // pente moyenne max prise en compte (%)
+const B0=[39,35,31,27,23,19]; // limites des zones à pente 0 (km/h)
+const XX=15; // décroissance des zones : V(p) = V(0) / (1 + XX × p), p en décimal
+const TERRAINS=[{n:"Plat",a:0,b:.5,m:.3},{n:"Vallonné",a:.5,b:1.5,m:1},{n:"Escarpé",a:1.5,b:2.5,m:2},{n:"Abrupte",a:2.5,b:99,m:3}];
+
+const state={rides:[],rider:"",time:"tm",types:{r:true,u:false},minKm:20};
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const fr=(x,d=1)=>x.toLocaleString("fr-FR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const $=id=>document.getElementById(id);
+
+function bounds(g){return B0.map(b=>b/(1+XX*g/100))}
+function zoneOf(g,v){
+  const bd=bounds(g);
+  let i=-1;
+  for(let z=0;z<5;z++){if(v<=bd[z]&&v>bd[z+1]){i=z;break}}
+  if(v>bd[0])return{idx:[0],label:"Au-dessus du gris",above:true};
+  if(v<=bd[5])return{idx:[4],label:"Sous le blanc",below:true};
+  const top=bd[i],bot=bd[i+1],f=(v-bot)/(top-bot);
+  const idx=[i];
+  if(f>.8&&i>0)idx.unshift(i-1);
+  if(f<.2&&i<4)idx.push(i+1);
+  return{idx,label:ZONES[i].n,f};
+}
+function compute(r){
+  const t=(state.time==="tm"?r.tm:r.te)/3600;
+  const V=r.km/t,g=r.dp/(r.km*10);
+  return{...r,V,g};
+}
+function selected(){return state.rides.filter(r=>state.types[r.ty]!==false&&r.km>=state.minKm&&r.tm>0)}
+function linfit(pts){
+  const n=pts.length;if(n<3)return null;let sx=0,sy=0,sxx=0,sxy=0;
+  for(const{x,y}of pts){sx+=x;sy+=y;sxx+=x*x;sxy+=x*y}
+  const d=n*sxx-sx*sx;if(Math.abs(d)<1e-9)return null;
+  const b=(n*sxy-sx*sy)/d,a=(sy-b*sx)/n;return{a,b};
+}
+function polyfit2(pts){
+  const n=pts.length;if(n<4)return null;
+  let s=[0,0,0,0,0],t=[0,0,0];
+  for(const{x,y}of pts){let p=1;for(let i=0;i<5;i++){s[i]+=p;if(i<3)t[i]+=p*y;p*=x}}
+  const M=[[s[0],s[1],s[2],t[0]],[s[1],s[2],s[3],t[1]],[s[2],s[3],s[4],t[2]]];
+  for(let i=0;i<3;i++){let mx=i;for(let j=i+1;j<3;j++)if(Math.abs(M[j][i])>Math.abs(M[mx][i]))mx=j;[M[i],M[mx]]=[M[mx],M[i]];
+    if(Math.abs(M[i][i])<1e-12)return null;
+    for(let j=0;j<3;j++)if(j!==i){const f=M[j][i]/M[i][i];for(let c=i;c<4;c++)M[j][c]-=f*M[i][c]}}
+  const c=[M[0][3]/M[0][0],M[1][3]/M[1][1],M[2][3]/M[2][2]];
+  return x=>c[0]+c[1]*x+c[2]*x*x;
+}
+
+let chart;
+function buildChart(){
+  const ctx=$("chart");
+  const zoneSets=ZONES.map((z,i)=>({type:"line",label:"z"+i,data:[],borderWidth:0,pointRadius:0,fill:"+1",backgroundColor:"transparent",order:10}));
+  zoneSets.push({type:"line",label:"z5",data:[],borderWidth:0,pointRadius:0,fill:false,order:10});
+  chart=new Chart(ctx,{
+    data:{datasets:[...zoneSets,
+      {type:"scatter",label:"Sorties",data:[],pointStyle:"rectRot",pointRadius:5,pointHoverRadius:7,order:1},
+      {type:"line",label:"Profil moyen",data:[],borderDash:[7,5],borderWidth:2.5,pointRadius:0,fill:false,order:2},
+      {type:"line",label:"Droite VD+",data:[],borderWidth:1.5,pointRadius:0,fill:false,order:3}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:250},
+      scales:{x:{type:"linear",min:0,max:3.5,grid:{},title:{display:true,text:"Pente moyenne (D+ / distance)"},ticks:{callback:v=>fr(v,1)+" %",stepSize:.5}},
+              y:{min:10,max:40,grid:{},title:{display:true,text:"Vitesse moyenne de la sortie (km/h)"},ticks:{stepSize:5}}},
+      plugins:{legend:{display:false},
+        tooltip:{filter:i=>i.dataset.label==="Sorties",callbacks:{label:c=>{const r=c.raw.r;return[r.n+" ("+r.d+")",fr(r.km,0)+" km · "+r.dp+" m D+",
+          "Pente "+fr(r.g,2)+" % · "+fr(r.V)+" km/h → "+zoneOf(r.g,r.V).label]}}}}},
+    plugins:[{id:"terrains",afterDraw(c){
+      const{ctx,chartArea:a,scales:{x}}=c;ctx.save();ctx.font="600 12px Barlow, sans-serif";ctx.fillStyle=css("--muted");ctx.textAlign="center";
+      [[0,.5,"Plat"],[.5,1.5,"Vallonné"],[1.5,2.5,"Escarpé"],[2.5,3.5,"Abrupte"]].forEach(([s,e,l])=>{
+        const xs=x.getPixelForValue(s),xe=x.getPixelForValue(e);ctx.fillText(l.toUpperCase(),(xs+xe)/2,a.bottom-8);
+        if(s>0){ctx.strokeStyle=css("--line");ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(xs,a.top);ctx.lineTo(xs,a.bottom);ctx.stroke()}});
+      ctx.restore()}}]
+  });
+}
+function themeChart(){
+  Chart.defaults.font.family="Barlow, system-ui, sans-serif";
+  const fg=css("--muted"),line=css("--line");
+  chart.options.scales.x.ticks.color=fg;chart.options.scales.y.ticks.color=fg;
+  chart.options.scales.x.title.color=fg;chart.options.scales.y.title.color=fg;
+  chart.options.scales.x.grid.color=line;chart.options.scales.y.grid.color=line;
+  ZONES.forEach((z,i)=>{chart.data.datasets[i].backgroundColor=css(z.v)+(i===0||i===4?"":"bb")});
+  const edge=chart.data.datasets[5];edge.borderWidth=1.5;edge.borderColor=css("--z-blanc-ink");
+  const pts=chart.data.datasets[6];pts.backgroundColor=css("--point");pts.borderColor=css("--point");
+  const reg=chart.data.datasets[7];reg.borderColor=css("--accent");
+  const lin=chart.data.datasets[8];lin.borderColor=css("--fg");
+}
+
+function chipHTML(idx){return idx.map(i=>`<span class="chip"><i style="background:var(${ZONES[i].v})"></i>${ZONES[i].n}</span>`).join("")}
+
+function render(){
+  const all=selected().map(r=>compute(r));
+  const rides=all.filter(r=>r.g<=GMAX),tooSteep=all.length-rides.length;
+  const pts=rides.map(r=>({x:r.g,y:r.V,r}));
+  const empty=!pts.length;
+  const fit=empty?null:polyfit2(pts.map(p=>({x:p.x,y:p.y})));
+  // zones
+  const XM=GMAX;for(let i=0;i<6;i++){const d=[];for(let g=0;g<=XM+.001;g+=.05)d.push({x:g,y:bounds(g)[i]});chart.data.datasets[i].data=d}
+  chart.data.datasets[6].data=pts;
+  const gmin=empty?0:Math.min(...pts.map(p=>p.x)),gmax=empty?0:Math.max(...pts.map(p=>p.x));
+  const reg=[];if(fit)for(let g=gmin;g<=gmax+1e-9;g+=(gmax-gmin)/40||1)reg.push({x:g,y:fit(g)});
+  chart.data.datasets[7].data=reg;
+  const L=empty?null:linfit(pts);
+  chart.data.datasets[8].data=L?[{x:0,y:L.a},{x:GMAX,y:L.a+L.b*GMAX}]:[];
+  const ys=pts.map(p=>p.y);
+  chart.options.scales.y.min=Math.max(0,Math.floor(Math.min(10,...ys)/5)*5);
+  chart.options.scales.y.max=Math.ceil(Math.max(40,...ys)/5)*5;
+  themeChart();chart.update();
+
+  $("summary").textContent=empty?"Aucune sortie chargée : les bandes montrent les zones de couleur LSR. Charge ton fichier activities.csv pour voir tes points et ta courbe.":`${rides.length} sorties affichées · ${state.rider} · temps ${state.time==="tm"?"en mouvement":"total"} · courbe orange : ton profil (régression polynomiale d'ordre 2) · trait fin : droite VD+ (régression linéaire)${tooSteep?` · ${tooSteep} sortie${tooSteep>1?"s":""} au-delà de 3,5 % de pente écartée${tooSteep>1?"s":""} (trop spécifique${tooSteep>1?"s":""})`:""}`;
+
+  // terrains
+  $("terrains").innerHTML=empty?TERRAINS.map(t=>`<div class="tcard"><div class="tname">${t.n}</div><div class="range">${t.b>9?"plus de "+fr(t.a,1)+" %":fr(t.a,1)+" à "+fr(t.b,1)+" %"} de pente moyenne</div><p class="muted">Ta couleur apparaît ici une fois tes sorties chargées.</p></div>`).join(""):TERRAINS.map(t=>{
+    const inT=rides.filter(r=>r.g>=t.a&&r.g<t.b);
+    if(!fit)return`<div class="tcard"><div class="tname">${t.n}</div><p class="muted">Pas assez de sorties.</p></div>`;
+    const v=fit(t.m),z=zoneOf(t.m,v);
+    const extrap=t.m<gmin-.15||t.m>gmax+.15;
+    return`<div class="tcard"><div class="tname">${t.n}</div><div class="range">${t.b>9?"plus de "+fr(t.a,1)+" %":fr(t.a,1)+" à "+fr(t.b,1)+" %"} de pente moyenne</div>
+      <div class="chips">${chipHTML(z.idx)}</div>
+      <div class="val">${fr(v)} km/h attendus · ${inT.length} sortie${inT.length>1?"s":""}</div>
+      ${extrap||inT.length<3?`<div class="warn">${extrap?"Extrapolé : pas de sortie sur ce terrain":"Peu de sorties sur ce terrain"}</div>`:""}</div>`}).join("");
+
+  // planificateur
+  const km=+$("pKm").value,dp=+$("pDp").value;
+  if(km>0&&fit){
+    const g=dp/(km*10),v=fit(Math.min(Math.max(g,gmin),gmax)),z=zoneOf(g,v);
+    const T=TERRAINS.find(t=>g>=t.a&&g<t.b).n;
+    const dur=km/v,h=Math.floor(dur),m=Math.round((dur-h)*60);
+    const zoneTimes=[0,1,2,3,4].map(i=>{const bd=bounds(g);const mid=(bd[i]+bd[i+1])/2;const d=km/mid;return`<span class="chip"><i style="background:var(${ZONES[i].v})"></i>${Math.floor(d)} h ${String(Math.round((d%1)*60)).padStart(2,"0")}</span>`}).join("");
+    $("planOut").innerHTML=`<div class="muted">Pente moyenne ${fr(g,2)} % · terrain ${T}</div>
+      <div class="chips">${chipHTML(z.idx)}</div>
+      <div class="big">${fr(v)} km/h attendus · ${h} h ${String(m).padStart(2,"0")} en mouvement</div>
+      <div class="muted" style="font-size:.85rem">Temps en mouvement estimé pour chaque groupe, au milieu de sa bande :</div>
+      <div class="chips">${zoneTimes}</div>`;
+  }else if(km>0){
+    const g=dp/(km*10),T=TERRAINS.find(t=>g>=t.a&&g<t.b).n;
+    const zoneTimes=[0,1,2,3,4].map(i=>{const bd=bounds(g);const mid=(bd[i]+bd[i+1])/2;const d=km/mid;return`<span class="chip"><i style="background:var(${ZONES[i].v})"></i>${Math.floor(d)} h ${String(Math.round((d%1)*60)).padStart(2,"0")}</span>`}).join("");
+    $("planOut").innerHTML=`<div class="muted">Pente moyenne ${fr(g,2)} % · terrain ${T}</div>
+      <div class="muted" style="font-size:.85rem">Temps en mouvement estimé pour chaque groupe. Charge tes sorties pour savoir lequel est le tien.</div>
+      <div class="chips">${zoneTimes}</div>`;
+  }else $("planOut").innerHTML=`<p class="muted">Entre une distance.</p>`;
+
+  // VD+ et coefficient VD+
+  if(!L){
+    $("vdplus").innerHTML=`<div><span>VD+</span><b>–</b><small>vitesse à 0 %</small></div><div><span>Coefficient VD+</span><b>–</b><small>km/h par % de pente</small></div>`;
+    $("calib").innerHTML=`<dt>Données</dt><dd>${empty?"Charge tes sorties pour calculer ton VD+":"Pas assez de sorties"}</dd>`;
+    $("copyStats").hidden=true;
+  }else{
+    // xx équivalent : ajustement de V = V0 / (1 + xx·p) via 1/V = 1/V0 + (xx/100V0)·pente
+    const H=linfit(pts.map(q=>({x:q.x,y:1/q.y}))), xxR=H?H.b*100/H.a:NaN, z0=zoneOf(0,L.a);
+    $("vdplus").innerHTML=`<div><span>VD+</span><b>${fr(L.a)}</b><small>km/h à 0 % · ${z0.label}</small></div><div><span>Coefficient VD+</span><b>${L.b<0?"−":"+"}${fr(Math.abs(L.b),2)}</b><small>km/h par % de pente</small></div>`;
+    $("calib").innerHTML=`<dt>Sorties</dt><dd>${rides.length}, pente de ${fr(gmin,1)} à ${fr(gmax,1)} %</dd>
+      <dt>xx équivalent</dt><dd>${fr(xxR,1)} <span class="muted" style="font-weight:400">(zones : ${XX})</span></dd>
+      <dt>Lecture</dt><dd>${xxR>XX*1.1?"Tu perds plus que les zones quand ça grimpe : profil rouleur, ta couleur baisse sur les terrains pentus.":xxR<XX*.9?"Tu perds moins que les zones quand ça grimpe : profil grimpeur, ta couleur monte sur les terrains pentus.":"Ta décroissance suit celle des zones : même couleur sur tous les terrains."}</dd>`;
+    state.stats=`${state.rider||"Rider"} · VD+ ${fr(L.a)} km/h · coef VD+ ${L.b<0?"−":"+"}${fr(Math.abs(L.b),2)} km/h/% · xx équivalent ${fr(xxR,1)} · ${rides.length} sorties (${fr(gmin,1)} à ${fr(gmax,1)} %)`;
+    $("copyStats").hidden=false;
+  }
+
+  // tableau
+  $("tbody").innerHTML=rides.sort((a,b)=>b.d.localeCompare(a.d)).map(r=>{const z=zoneOf(r.g,r.V);
+    return`<tr><td>${r.d}</td><td class="nm" title="${r.n.replace(/"/g,"&quot;")}">${r.n}</td><td>${fr(r.km,1)}</td><td>${r.dp}</td><td>${fr(r.g,2)} %</td><td><b>${fr(r.V)}</b></td><td><span class="dot" style="background:var(${ZONES[z.idx[0]].v})"></span>${z.label}</td></tr>`}).join("");
+}
+
+function buildTypes(){
+  if(!state.rides.length){$("types").innerHTML='<span class="muted" style="font-size:.85rem">Disponible après le chargement.</span>';return}
+  $("types").innerHTML=Object.entries(TYPES).filter(([k])=>state.rides.some(r=>r.ty===k)).map(([k,l])=>{
+    const n=state.rides.filter(r=>r.ty===k).length;
+    return`<label><input type="checkbox" id="ty-${k}" data-k="${k}" ${state.types[k]?"checked":""}> ${l}<span class="n">${n}</span></label>`}).join("");
+  $("types").querySelectorAll("input").forEach(i=>i.addEventListener("change",e=>{state.types[e.target.dataset.k]=e.target.checked;render()}));
+}
+
+// --- import CSV Strava ---
+function parseCSV(text){
+  const rows=[];let row=[],f="",q=false;
+  for(let i=0;i<text.length;i++){const c=text[i];
+    if(q){if(c==='"'){if(text[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+    else if(c==='"')q=true;else if(c===","){row.push(f);f=""}else if(c==="\n"||c==="\r"){if(c==="\r"&&text[i+1]==="\n")i++;row.push(f);rows.push(row);row=[];f=""}else f+=c}
+  if(f||row.length){row.push(f);rows.push(row)}
+  return rows;
+}
+const num=s=>{if(s==null)return NaN;s=String(s).trim().replace(/\s/g,"");if(/,\d{1,3}$/.test(s)&&!s.includes("."))s=s.replace(",",".");else s=s.replace(/,/g,"");return parseFloat(s)};
+function importCSV(text){
+  const rows=parseCSV(text);if(rows.length<2)throw new Error("Fichier vide.");
+  const h=rows[0].map(x=>x.trim().toLowerCase());
+  const find=(...names)=>{for(const n of names){const i=h.indexOf(n);if(i>=0)return i}return-1};
+  const iType=find("activity type","type d'activité","type d’activité"),iDate=find("activity date","date de l'activité","date de l’activité"),iName=find("activity name","nom de l'activité","nom de l’activité");
+  const iCom=find("commute","trajet domicile-travail");
+  const iDist=find("distance"),iMov=find("moving time","durée de déplacement","temps de déplacement"),iEl=find("elapsed time","temps écoulé","durée écoulée"),iDp=find("elevation gain","dénivelé positif");
+  if(iType<0||iDist<0||iDp<0||(iMov<0&&iEl<0))throw new Error("Colonnes introuvables. Utilise le fichier activities.csv de l'archive Strava.");
+  const out=[];
+  for(const r of rows.slice(1)){
+    const ty=(r[iType]||"").toLowerCase();
+    if(!/^(ride|vélo|velo|sortie vélo|gravel ride|e-bike ride)$/.test(ty)&&!(ty.includes("ride")&&!ty.includes("virtual")))continue;
+    let km=num(r[iDist]);if(km>1000)km/=1000;
+    const tm=num(r[iMov]),te=num(r[iEl]),dp=num(r[iDp]);
+    if(!(km>0)||!(dp>=0))continue;
+    const t1=tm>0?tm:te,t2=te>0?te:tm;if(!(t1>0))continue;
+    const dt=new Date(r[iDate]);const d=isNaN(dt)?(r[iDate]||"").slice(0,12):dt.toISOString().slice(0,10);
+    const com=iCom>=0&&/^(true|1|vrai)$/i.test((r[iCom]||"").trim());
+    out.push({d,n:r[iName]||"Sortie",km,tm:t1,te:t2,dp,ty:com?"u":"r"});
+  }
+  if(!out.length)throw new Error("Aucune sortie vélo trouvée dans ce fichier.");
+  return out;
+}
+function loadFile(f){
+  const rd=new FileReader();
+  rd.onload=()=>{try{const rides=importCSV(rd.result);state.rides=rides;state.rider=$("rider").value.trim();state.types={r:true,u:false};
+      $("who").textContent=state.rider?" — "+state.rider:"";$("reset").hidden=false;$("importMsg").textContent=`${rides.length} sorties vélo chargées${state.rider?" pour "+state.rider:""}. Rien n'a quitté ton navigateur.`;buildTypes();render()}
+    catch(e){$("importMsg").textContent=e.message}};
+  rd.readAsText(f);
+}
+$("file").addEventListener("change",e=>{if(e.target.files[0])loadFile(e.target.files[0])});
+const drop=$("drop");
+["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over")}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over")}));
+drop.addEventListener("drop",e=>{const f=e.dataTransfer.files[0];if(f)loadFile(f)});
+$("reset").addEventListener("click",()=>{state.rides=[];state.rider="";$("who").textContent="";$("file").value="";$("reset").hidden=true;$("importMsg").textContent="Sorties effacées.";buildTypes();render()});
+
+// --- contrôles ---
+$("copyStats").addEventListener("click",()=>{navigator.clipboard.writeText(state.stats).then(()=>{$("copyStatsMsg").textContent="Copié. Envoie-le à Vincent."}).catch(()=>{$("copyStatsMsg").textContent=state.stats})});
+$("minKm").addEventListener("input",e=>{state.minKm=+e.target.value;$("minKmOut").textContent=state.minKm+" km";render()});
+$("tMoving").addEventListener("click",()=>{state.time="tm";$("tMoving").setAttribute("aria-pressed","true");$("tElapsed").setAttribute("aria-pressed","false");render()});
+$("tElapsed").addEventListener("click",()=>{state.time="te";$("tMoving").setAttribute("aria-pressed","false");$("tElapsed").setAttribute("aria-pressed","true");render()});
+["pKm","pDp"].forEach(id=>$(id).addEventListener("input",render));
+$("copy").addEventListener("click",()=>{const t=$("prompt").textContent;
+  navigator.clipboard.writeText(t).then(()=>{$("copyMsg").textContent="Prompt copié."}).catch(()=>{const s=window.getSelection(),r=document.createRange();r.selectNodeContents($("prompt"));s.removeAllRanges();s.addRange(r);$("copyMsg").textContent="Texte sélectionné, fais Copier."})});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{themeChart();chart.update()});
+new MutationObserver(()=>{themeChart();chart.update()}).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+buildChart();buildTypes();render();
+</script>
+</body>
+</html>
