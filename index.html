@@ -34,6 +34,10 @@ body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15
 h1,h2,h3{font-family:var(--f-display);font-weight:700;letter-spacing:.01em;margin:0;text-wrap:balance}
 h1{font-size:2.3rem;line-height:1.05;text-transform:uppercase}
 h2{font-size:1.35rem;text-transform:uppercase}
+.vdhead{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 14px}
+.vdtype{font-family:var(--f-display);font-size:2rem;font-weight:700;line-height:1.05;text-transform:uppercase;color:var(--pt-year);margin-left:auto;text-align:right}
+.vdtype:empty{display:none}
+.vdplus b .pm{font-size:.6em;font-weight:500;color:var(--muted);margin-left:.35em;white-space:nowrap;text-transform:none;letter-spacing:0}
 .eyebrow{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
 p{margin:0}
 .lede{color:var(--muted);max-width:68ch}
@@ -50,13 +54,19 @@ header{display:flex;flex-direction:column;gap:8px}
 .ctl label output{font-family:var(--f-display);font-size:1.05rem;color:var(--accent);font-variant-numeric:tabular-nums}
 .ctl small{color:var(--muted);font-size:.8rem;line-height:1.35}
 input[type=range]{width:100%;accent-color:var(--accent)}
+.dual{position:relative;height:26px}
+.dual::before{content:"";position:absolute;left:0;right:0;top:11px;height:4px;border-radius:2px;background:var(--line)}
+.dual .fill{position:absolute;top:11px;height:4px;border-radius:2px;background:var(--accent)}
+.dual input[type=range]{position:absolute;left:0;top:0;width:100%;height:26px;margin:0;background:none;-webkit-appearance:none;appearance:none;pointer-events:none}
+.dual input[type=range]::-webkit-slider-runnable-track{background:transparent;height:26px}
+.dual input[type=range]::-moz-range-track{background:transparent;height:26px}
+.dual input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;pointer-events:auto;width:18px;height:18px;margin-top:4px;border-radius:50%;background:var(--accent);border:2px solid var(--surface);box-shadow:0 0 0 1px var(--accent);cursor:grab}
+.dual input[type=range]::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;background:var(--accent);border:2px solid var(--surface);box-shadow:0 0 0 1px var(--accent);cursor:grab}
+.dual input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid var(--fg);outline-offset:2px}
 .checks{display:flex;flex-direction:column;gap:6px}
 .checks label{display:flex;gap:8px;align-items:center;font-size:.92rem}
 .checks .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-left:auto}
 input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
-.seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
-.seg button{flex:1;border:0;background:transparent;color:var(--fg);font:inherit;font-size:.88rem;padding:6px 8px;cursor:pointer}
-.seg button[aria-pressed=true]{background:var(--fg);color:var(--bg)}
 button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .terrains{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 @media (max-width:760px){.terrains{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -65,6 +75,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .tcard .range{font-size:.8rem;color:var(--muted)}
 .chips{display:flex;gap:6px;flex-wrap:wrap;min-height:30px}
 .chip{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:.9rem;padding:3px 10px 3px 4px;border-radius:999px;border:1px solid var(--line)}
+.chip.two{border-radius:16px;padding:4px 12px 4px 5px}
+.chip .cl{line-height:1.3}
+.chip .ct{font-weight:500;font-size:.8rem;color:var(--muted)}
 .chip i{width:20px;height:20px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.15)}
 .tcard .val{font-variant-numeric:tabular-nums;font-size:.85rem;color:var(--muted)}
 .warn{font-size:.78rem;color:var(--accent)}
@@ -128,7 +141,7 @@ details summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font
       <div class="result" id="planOut"></div>
     </div>
     <div class="panel">
-      <h2 id="vdTitle">Ton Profil VD+</h2>
+      <div class="vdhead"><h2 id="vdTitle">Ton profil VD+</h2><div class="vdtype" id="vdType"></div></div>
       <p class="muted">Droite de régression linéaire de ta vitesse en fonction de la pente. Le <b>VD+</b> est ta vitesse à 0 % de pente. Le <b>coefficient VD+</b> est le xx équivalent : le coefficient de décroissance qui ajuste le mieux tes rides, à comparer au 15 des zones.</p>
       <div class="vdplus" id="vdplus"></div>
       <dl class="kv" id="calib"></dl>
@@ -145,13 +158,6 @@ details summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font
     <aside class="panel" aria-label="Réglages">
       <h2>Réglages</h2>
       <div class="ctl">
-        <label>Temps utilisé</label>
-        <div class="seg" role="group" aria-label="Temps utilisé">
-          <button type="button" id="tMoving" aria-pressed="true">En mouvement</button>
-          <button type="button" id="tElapsed" aria-pressed="false">Total</button>
-        </div>
-      </div>
-      <div class="ctl">
         <label>Rides pris en compte</label>
         <div class="checks" id="types"></div>
       </div>
@@ -162,15 +168,19 @@ details summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font
         <small>Les rides de plus de 3,5 % de pente moyenne sont écartés : trop spécifiques pour situer un niveau.</small>
       </div>
       <div class="ctl">
-        <label for="minKm">Distance minimale <output id="minKmOut">20 km</output></label>
-        <input type="range" id="minKm" min="10" max="80" step="5" value="20">
+        <label for="minKm">Distance <output id="kmOut">40 – 160 km</output></label>
+        <div class="dual">
+          <div class="fill" id="kmFill"></div>
+          <input type="range" id="minKm" min="0" max="300" step="5" value="40" aria-label="Distance minimale">
+          <input type="range" id="maxKm" min="0" max="300" step="5" value="160" aria-label="Distance maximale">
+        </div>
       </div>
     </aside>
   </section>
 
   <section class="panel">
     <h2>Ta couleur selon les catégories de ride</h2>
-    <p class="muted">Lue sur ta courbe au milieu de chaque terrain. Deux pastilles : tu es à la frontière entre deux groupes, à moduler selon l'envie du jour.</p>
+    <p class="muted">Lue sur ta courbe au milieu de chaque catégorie. Deux pastilles : tu es à la frontière entre deux groupes, à moduler selon l'envie du jour.</p>
     <div class="terrains" id="terrains"></div>
   </section>
 
@@ -199,9 +209,9 @@ details summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font
     </div>
     <div class="panel">
       <h2>Le prompt Strava</h2>
-            <pre class="prompt" id="prompt">Connecte-toi à mon Strava et récupère mes rides vélo (Ride, pas les rides virtuels) des 12 derniers mois, de plus de 20 km.
+            <pre class="prompt" id="prompt">Connecte-toi à mon Strava et récupère mes rides vélo (Ride, pas les rides virtuels) des 12 derniers mois, de 40 à 160 km.
 
-Pour chaque ride, calcule avec le temps en mouvement :
+Pour chaque ride, calcule avec le temps en déplacement :
 - V = distance (km) / temps (h)
 - pente moyenne = D+ / distance, en %
 Écarte les rides de plus de 3,5 % de pente moyenne.
@@ -242,7 +252,7 @@ const B0=[39,35,31,27,23,19]; // limites des zones à pente 0 (km/h)
 const XX=15; // décroissance des zones : V(p) = V(0) / (1 + XX × p), p en décimal
 const TERRAINS=[{n:"Plat",a:0,b:.5,m:.3},{n:"Vallonné",a:.5,b:1.5,m:1},{n:"Escarpé",a:1.5,b:2.5,m:2},{n:"Abrupte",a:2.5,b:99,m:3}];
 
-const state={rides:[],rider:"",time:"tm",types:{r:true,u:false},minKm:20};
+const state={rides:[],rider:"",types:{r:true,u:false},minKm:40,maxKm:160};
 const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const fr=(x,d=1)=>x.toLocaleString("fr-FR",{minimumFractionDigits:d,maximumFractionDigits:d});
 const $=id=>document.getElementById(id);
@@ -261,9 +271,16 @@ function zoneOf(g,v){
   return{idx,label:ZONES[i].n,f};
 }
 function compute(r){
-  const t=(state.time==="tm"?r.tm:r.te)/3600;
+  const t=r.tm/3600;
   const V=r.km/t,g=r.dp/(r.km*10);
   return{...r,V,g,p:periodOf(r.d)};
+}
+function hm(h){const t=Math.round(h*60);return Math.floor(t/60)+" h "+String(t%60).padStart(2,"0")}
+function zoneChips(g,km){ // vitesse (arrondie au demi km/h) et temps en déplacement de chaque zone
+  const bd=bounds(g);
+  return [0,1,2,3,4].map(i=>{
+    const lo=Math.floor(bd[i+1]*2+1e-9)/2,hi=Math.ceil(bd[i]*2-1e-9)/2;
+    return`<span class="chip two"><i style="background:var(${ZONES[i].v})"></i><span class="cl">${fr(lo,1)} à ${fr(hi,1)} km/h<br><span class="ct">${hm(km/hi)} à ${hm(km/lo)}</span></span></span>`}).join("");
 }
 const PCOL={recent:"--pt-recent",year:"--pt-year",prev:"--pt-prev"},PRANK={prev:0,year:1,recent:2};
 function periodOf(d){ // 3 derniers mois (vert), année en cours (bleu), année précédente (violet), sinon écartée
@@ -274,12 +291,15 @@ function periodOf(d){ // 3 derniers mois (vert), année en cours (bleu), année 
   if(yr===y-1)return"prev";
   return null;
 }
-function selected(){return state.rides.filter(r=>state.types[r.ty]!==false&&r.km>=state.minKm&&r.tm>0&&periodOf(r.d))}
+function selected(){return state.rides.filter(r=>state.types[r.ty]!==false&&r.km>=state.minKm&&r.km<=state.maxKm&&r.tm>0&&periodOf(r.d))}
 function linfit(pts){
   const n=pts.length;if(n<3)return null;let sx=0,sy=0,sxx=0,sxy=0;
   for(const{x,y}of pts){sx+=x;sy+=y;sxx+=x*x;sxy+=x*y}
   const d=n*sxx-sx*sx;if(Math.abs(d)<1e-9)return null;
-  const b=(n*sxy-sx*sy)/d,a=(sy-b*sx)/n;return{a,b};
+  const b=(n*sxy-sx*sy)/d,a=(sy-b*sx)/n;
+  let ssr=0;for(const{x,y}of pts){const e=y-a-b*x;ssr+=e*e}
+  const s2=n>2?ssr/(n-2):NaN,Sxx=d/n,xm=sx/n;
+  return{a,b,va:s2*(1/n+xm*xm/Sxx)}; // va : variance de l'ordonnée à l'origine
 }
 function polyfit2(pts){
   const n=pts.length;if(n<4)return null;
@@ -356,9 +376,12 @@ function render(){
     if(!fit)return`<div class="tcard"><div class="tname">${t.n}</div><p class="muted">Pas assez de rides.</p></div>`;
     const v=fit(t.m),z=zoneOf(t.m,v);
     const extrap=t.m<gmin-.15||t.m>gmax+.15;
+    // écart de la catégorie : écart type des rides autour de la vitesse attendue
+    const res=inT.map(r=>r.V-fit(r.g)),rm=res.reduce((a,b)=>a+b,0)/(res.length||1);
+    const sdT=res.length>=3?Math.sqrt(res.reduce((a,b)=>a+(b-rm)**2,0)/(res.length-1)):NaN;
     return`<div class="tcard"><div class="tname">${t.n}</div><div class="range">${t.b>9?"plus de "+fr(t.a,1)+" %":fr(t.a,1)+" à "+fr(t.b,1)+" %"} de pente moyenne</div>
       <div class="chips">${chipHTML(z.idx)}</div>
-      <div class="val">${fr(v)} km/h attendus · ${inT.length} ride${inT.length>1?"s":""}</div>
+      <div class="val">${fr(v)}${isFinite(sdT)?` ± ${fr(sdT,1)}`:""} km/h attendus · ${inT.length} ride${inT.length>1?"s":""}</div>
       ${extrap||inT.length<3?`<div class="warn">${extrap?"Extrapolé : pas de ride sur ce terrain":"Peu de rides sur ce terrain"}</div>`:""}</div>`}).join("");
 
   // planificateur
@@ -367,34 +390,34 @@ function render(){
     const g=dp/(km*10),v=fit(Math.min(Math.max(g,gmin),gmax)),z=zoneOf(g,v);
     const T=TERRAINS.find(t=>g>=t.a&&g<t.b).n;
     const dur=km/v,h=Math.floor(dur),m=Math.round((dur-h)*60);
-    const zoneTimes=[0,1,2,3,4].map(i=>{const bd=bounds(g);return`<span class="chip"><i style="background:var(${ZONES[i].v})"></i>${fr(Math.floor(bd[i+1]*2+1e-9)/2,1)} à ${fr(Math.ceil(bd[i]*2-1e-9)/2,1)} km/h</span>`}).join("");
+    const zoneTimes=zoneChips(g,km);
     $("planOut").innerHTML=`<div class="muted">Pente moyenne ${fr(g,2)} % · terrain ${T}</div>
       <div class="chips">${chipHTML(z.idx)}</div>
-      <div class="big">${fr(v)} km/h attendus · ${h} h ${String(m).padStart(2,"0")} en mouvement</div>
-      <div class="muted" style="font-size:.85rem">Intervalle de vitesse de chaque groupe sur ce terrain :</div>
+      <div class="big">${fr(v)} km/h attendus · ${h} h ${String(m).padStart(2,"0")} en déplacement</div>
+      <div class="muted" style="font-size:.85rem">Estimation des vitesses et temps en déplacement par zone :</div>
       <div class="chips">${zoneTimes}</div>`;
   }else if(km>0){
     const g=dp/(km*10),T=TERRAINS.find(t=>g>=t.a&&g<t.b).n;
-    const zoneTimes=[0,1,2,3,4].map(i=>{const bd=bounds(g);return`<span class="chip"><i style="background:var(${ZONES[i].v})"></i>${fr(Math.floor(bd[i+1]*2+1e-9)/2,1)} à ${fr(Math.ceil(bd[i]*2-1e-9)/2,1)} km/h</span>`}).join("");
+    const zoneTimes=zoneChips(g,km);
     $("planOut").innerHTML=`<div class="muted">Pente moyenne ${fr(g,2)} % · terrain ${T}</div>
-      <div class="muted" style="font-size:.85rem">Charge tes rides pour savoir lequel est le tien.<br>Intervalle de vitesse de chaque groupe sur ce terrain :</div>
+      <div class="muted" style="font-size:.85rem">Charge tes rides pour savoir lequel est le tien.<br>Estimation des vitesses et temps en déplacement par zone :</div>
       <div class="chips">${zoneTimes}</div>`;
   }else $("planOut").innerHTML=`<p class="muted">Entre une distance.</p>`;
 
   // VD+ et coefficient VD+
   if(!L){
     $("vdplus").innerHTML=`<div><span>VD+</span><b>–</b><small>vitesse à 0 %</small></div><div><span>Coefficient VD+</span><b>–</b><small>zones : ${XX}</small></div>`;
-    $("vdTitle").textContent="Ton Profil VD+";
+    $("vdType").textContent="";
     $("calib").innerHTML=`<dt>Données</dt><dd>${empty?"Charge tes rides pour calculer ton VD+":"Pas assez de rides"}</dd>`;
     $("copyStats").hidden=true;
   }else{
     // xx équivalent : ajustement de V = V0 / (1 + xx·p) via 1/V = 1/V0 + (xx/100V0)·pente
     const H=linfit(pts.map(q=>({x:q.x,y:1/q.y}))), xxR=H?H.b*100/H.a:NaN, z0=zoneOf(0,L.a);
-    $("vdplus").innerHTML=`<div><span>VD+</span><b>${fr(L.a)}</b><small>km/h à 0 % · ${z0.label}</small></div><div><span>Coefficient VD+</span><b>${fr(xxR,1)}</b><small>zones : ${XX}</small></div>`;
-    $("vdTitle").textContent="Ton Profil VD+"+(xxR>XX*1.2?" - Rouleur":xxR<XX*.8?" - Grimpeur":xxR>=XX*.8?" - Baroudeur":"");
+    $("vdplus").innerHTML=`<div><span>VD+</span><b>${fr(L.a)}${isFinite(L.va)&&L.va>=0?`<span class="pm">± ${fr(Math.sqrt(L.va),1)}</span>`:""}</b><small>km/h à 0 % · ${z0.label}</small></div><div><span>Coefficient VD+</span><b>${fr(xxR,1)}</b><small>zones : ${XX}</small></div>`;
+    $("vdType").textContent=xxR>XX*1.2?"Rouleur":xxR<XX*.8?"Grimpeur":xxR>=XX*.8?"Baroudeur":"";
     $("calib").innerHTML=`<dt>Rides</dt><dd>${rides.length}, pente de ${fr(gmin,1)} à ${fr(gmax,1)} %</dd>
       <dt>Lecture</dt><dd>${xxR>XX*1.2?"Tu perds plus que les zones quand ça grimpe : profil rouleur, ta couleur baisse sur les terrains pentus.":xxR<XX*.8?"Tu perds moins que les zones quand ça grimpe : profil grimpeur, ta couleur monte sur les terrains pentus.":"Ta décroissance suit celle des zones : profil baroudeur, même couleur sur tous les terrains."}</dd>`;
-    state.stats=`${state.rider||"Rider"} · VD+ ${fr(L.a)} km/h · coef VD+ ${fr(xxR,1)} · ${rides.length} rides (${fr(gmin,1)} à ${fr(gmax,1)} %)`;
+    state.stats=`${state.rider||"Rider"} · VD+ ${fr(L.a)}${isFinite(L.va)&&L.va>=0?" ± "+fr(Math.sqrt(L.va),1):""} km/h · coef VD+ ${fr(xxR,1)} · ${rides.length} rides (${fr(gmin,1)} à ${fr(gmax,1)} %)`;
     $("copyStats").hidden=false;
   }
 
@@ -460,9 +483,18 @@ $("reset").addEventListener("click",()=>{state.rides=[];state.rider="";$("who").
 
 // --- contrôles ---
 $("copyStats").addEventListener("click",()=>{navigator.clipboard.writeText(state.stats).then(()=>{$("copyStatsMsg").textContent="Copié. Envoie-le à Vincent."}).catch(()=>{$("copyStatsMsg").textContent=state.stats})});
-$("minKm").addEventListener("input",e=>{state.minKm=+e.target.value;$("minKmOut").textContent=state.minKm+" km";render()});
-$("tMoving").addEventListener("click",()=>{state.time="tm";$("tMoving").setAttribute("aria-pressed","true");$("tElapsed").setAttribute("aria-pressed","false");render()});
-$("tElapsed").addEventListener("click",()=>{state.time="te";$("tMoving").setAttribute("aria-pressed","false");$("tElapsed").setAttribute("aria-pressed","true");render()});
+function paintKm(){
+  const M=+$("minKm").max;
+  $("minKm").value=state.minKm;$("maxKm").value=state.maxKm;
+  $("kmOut").textContent=state.minKm+" – "+state.maxKm+" km";
+  const f=$("kmFill");f.style.left=(state.minKm/M*100)+"%";f.style.width=((state.maxKm-state.minKm)/M*100)+"%";
+  // si les deux poignées sont superposées, laisser attraper celle qui peut encore bouger
+  $("minKm").style.zIndex=state.minKm>=M/2?3:1;$("maxKm").style.zIndex=state.minKm>=M/2?1:3;
+}
+function syncKm(){paintKm();render()}
+$("minKm").addEventListener("input",e=>{state.minKm=+e.target.value;if(state.minKm>state.maxKm)state.maxKm=state.minKm;syncKm()});
+$("maxKm").addEventListener("input",e=>{state.maxKm=+e.target.value;if(state.maxKm<state.minKm)state.minKm=state.maxKm;syncKm()});
+paintKm();
 ["pKm","pDp"].forEach(id=>$(id).addEventListener("input",render));
 $("copy").addEventListener("click",()=>{const t=$("prompt").textContent;
   navigator.clipboard.writeText(t).then(()=>{$("copyMsg").textContent="Prompt copié."}).catch(()=>{const s=window.getSelection(),r=document.createRange();r.selectNodeContents($("prompt"));s.removeAllRanges();s.addRange(r);$("copyMsg").textContent="Texte sélectionné, fais Copier."})});
