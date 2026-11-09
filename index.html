@@ -112,7 +112,6 @@ input[type=text]{font:inherit;padding:8px 10px;border:1px solid var(--line);bord
 .consent p{margin:8px 0 0}
 .consent code{font-size:.8rem;word-break:break-all}
 
-pre.prompt{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:.85rem;margin:0;max-height:300px;overflow:auto}
 .tbl-wrap{overflow-x:auto;max-height:420px;overflow-y:auto;border:1px solid var(--line);border-radius:8px}
 table{border-collapse:collapse;width:100%;font-size:.85rem;font-variant-numeric:tabular-nums}
 th,td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -199,7 +198,7 @@ details summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font
       <li>Dépose ici le fichier <b>activities.csv</b> qui se trouve à la racine de l'archive.</li>
     </ol>
     <div class="consent">
-      <label><input type="checkbox" id="consent"><span><b>J'accepte que les données suivantes soient transmises à LSR.</b> Seuls mon VD+ (avec son écart type) et mon coefficient VD+ sont envoyés, uniquement pour permettre à LSR d'ajuster les zones de couleur. Ces données sont pseudonymisées : un identifiant aléatoire, créé dans ce navigateur, évite les doublons pour un même utilisateur. Mon fichier, mes rides et mon prénom ne sont jamais envoyés. Les demandes de suppression de données sont à faire auprès de Lyon Social Rides. Je peux retirer mon accord en décochant la case.</span></label>
+      <label><input type="checkbox" id="consent"><span><b>J'accepte que les données suivantes soient transmises à LSR.</b> Seuls mon VD+ (avec son écart type) et mon coefficient VD+ sont envoyés, uniquement pour permettre à LSR d'ajuster les zones de couleur. Ces données sont pseudonymisées : un identifiant aléatoire, créé dans ce navigateur, évite les doublons pour un même utilisateur. Mon fichier, mes rides et mon prénom ne sont jamais envoyés. Les demandes de suppression de données sont à faire auprès de Lyon Social Rides.</span></label>
       <p class="src">Ton identifiant aléatoire : <code id="cid">…</code> — à communiquer si tu demandes la suppression de tes données.</p>
     </div>
     <div class="drop off" id="drop">
@@ -213,14 +212,13 @@ details summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font
     <p class="src" id="importMsg">Coche la case d'accord pour pouvoir charger ton fichier. Il est lu dans ton navigateur et n'est jamais envoyé : seuls tes chiffres VD+ le sont, avec ton accord. Tes rides sont gardés sur cet appareil pour ta prochaine visite ; « Effacer mes rides » les supprime.</p>
   </section>
 
-  <section class="two">
-    <div class="panel">
+  <section class="panel">
       <h2>Pas d'archive sous la main ?</h2>
-      <p class="muted">Si tu utilises Claude avec le connecteur Strava, ce prompt donne ton VD+ et tes couleurs sans passer par l'archive.</p>
-    </div>
-    <div class="panel">
-      <h2>Le prompt Strava</h2>
-            <pre class="prompt" id="prompt">Connecte-toi à mon Strava et récupère mes rides vélo (Ride, pas les rides virtuels) des 12 derniers mois, de 40 à 160 km.
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <p class="muted" style="margin:0;flex:1 1 320px">Si tu utilises Claude avec le connecteur Strava, ce prompt donne ton VD+ et tes couleurs sans passer par l'archive.</p>
+        <div class="row" style="align-items:center;flex:none;margin-left:auto"><span class="src" id="copyMsg"></span><button class="btn" type="button" id="copy">Copier le prompt</button></div>
+      </div>
+      <script type="text/plain" id="prompt">Connecte-toi à mon Strava et récupère mes rides vélo (Ride, pas les rides virtuels) des 12 derniers mois, de 40 à 160 km.
 
 Pour chaque ride, calcule avec le temps en déplacement :
 - V = distance (km) / temps (h)
@@ -234,11 +232,9 @@ Pour chaque ride, calcule avec le temps en déplacement :
 Zones de couleur LSR, vitesse à 0 % : Noir 35 à 39, Rouge 31 à 35, Bleu 27 à 31, Vert 23 à 27, Blanc 19 à 23.
 Elles décroissent avec la pente : V(pente) = V(0) / (1 + 15 × pente), pente en décimal (3,5 % = 0,035).
 
-Terrains : Plat &lt; 0,5 %, Vallonné 0,5 à 1,5 %, Escarpé 1,5 à 2,5 %, Abrupte 2,5 à 3,5 %.
+Terrains : Plat < 0,5 %, Vallonné 0,5 à 1,5 %, Escarpé 1,5 à 2,5 %, Abrupte 2,5 à 3,5 %.
 
-Donne-moi mon VD+, mon coefficient VD+, mon profil (Rouleur si coefficient VD+ &gt; 18, Grimpeur si &lt; 12, Baroudeur entre 12 et 18 inclus), et ma couleur sur chaque terrain lue sur ma courbe polynomiale (deux couleurs si je suis à moins de 20 % d'une frontière).</pre>
-      <div class="row"><button class="btn" type="button" id="copy">Copier le prompt</button><span class="src" id="copyMsg"></span></div>
-    </div>
+Donne-moi mon VD+, mon coefficient VD+, mon profil (Rouleur si coefficient VD+ > 18, Grimpeur si < 12, Baroudeur entre 12 et 18 inclus), et ma couleur sur chaque terrain lue sur ma courbe polynomiale (deux couleurs si je suis à moins de 20 % d'une frontière).</script>
   </section>
 
   <section class="panel">
@@ -250,7 +246,6 @@ Donne-moi mon VD+, mon coefficient VD+, mon profil (Rouleur si coefficient VD+ &
     </details>
   </section>
 
-  <p class="src">Zones LSR : vitesse sur le plat de 39, 35, 31, 27, 23 et 19 km/h, qui décroît avec la pente selon V(pente) = V(0) / (1 + 15 × pente), la pente étant exprimée en décimal (3,5 % = 0,035). Prototype, pas encore calibré sur le club.</p>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -273,13 +268,13 @@ function zoneOf(g,v){
   const bd=bounds(g);
   let i=-1;
   for(let z=0;z<5;z++){if(v<=bd[z]&&v>bd[z+1]){i=z;break}}
-  if(v>bd[0])return{idx:[0],label:"Au-dessus du noir",above:true};
-  if(v<=bd[5])return{idx:[4],label:"Sous le blanc",below:true};
+  if(v>bd[0])return{idx:[0],main:0,label:"Au-dessus du noir",above:true};
+  if(v<=bd[5])return{idx:[4],main:4,label:"Sous le blanc",below:true};
   const top=bd[i],bot=bd[i+1],f=(v-bot)/(top-bot);
   const idx=[i];
   if(f>.8&&i>0)idx.unshift(i-1);
   if(f<.2&&i<4)idx.push(i+1);
-  return{idx,label:ZONES[i].n,f};
+  return{idx,main:i,label:ZONES[i].n,f};
 }
 function compute(r){
   const t=r.tm/3600;
@@ -435,7 +430,7 @@ function render(){
 
   // tableau
   $("tbody").innerHTML=rides.sort((a,b)=>b.d.localeCompare(a.d)).map(r=>{const z=zoneOf(r.g,r.V);
-    return`<tr><td>${r.d}</td><td class="nm" title="${r.n.replace(/"/g,"&quot;")}">${r.n}</td><td>${Math.floor(r.tm/3600)} h ${String(Math.floor(r.tm%3600/60)).padStart(2,"0")}</td><td>${fr(r.km,1)}</td><td>${r.dp}</td><td>${fr(r.g,2)} %</td><td><b>${fr(r.V)}</b></td><td><span class="dot" style="background:var(${ZONES[z.idx[0]].v})"></span>${z.label}</td></tr>`}).join("");
+    return`<tr><td>${r.d}</td><td class="nm" title="${r.n.replace(/"/g,"&quot;")}">${r.n}</td><td>${Math.floor(r.tm/3600)} h ${String(Math.floor(r.tm%3600/60)).padStart(2,"0")}</td><td>${fr(r.km,1)}</td><td>${r.dp}</td><td>${fr(r.g,2)} %</td><td><b>${fr(r.V)}</b></td><td><span class="dot" style="background:var(${ZONES[z.main].v})"></span>${z.label}${z.f>5/6?" +":z.f<1/6?" -":""}</td></tr>`}).join("");
 }
 
 function buildTypes(){
@@ -497,7 +492,7 @@ function sendStats(){
   const r3=x=>Math.round(x*1000)/1000;
   fetch(SB_URL+"/rest/v1/vdplus_stats",{method:"POST",keepalive:true,
     headers:{apikey:SB_KEY,"Content-Type":"application/json",Prefer:"return=minimal"},
-    body:JSON.stringify({client_id:clientId(),vd_plus:r3(d.vd),vd_plus_se:d.se==null?null:r3(d.se),coef_vd:r3(d.coef),version:"3"})})
+    body:JSON.stringify({client_id:clientId(),vd_plus:r3(d.vd),vd_plus_se:d.se==null?null:r3(d.se),coef_vd:r3(d.coef),version:"4"})})
   .then(r=>{if(r.ok)$("importMsg").textContent+=" Tes chiffres VD+ ont été transmis à LSR, de façon pseudonymisée."}).catch(()=>{});
 }
 const STORE="vdlsr.v1";
@@ -544,7 +539,10 @@ $("maxKm").addEventListener("input",e=>{state.maxKm=+e.target.value;if(state.max
 paintKm();
 ["pKm","pDp"].forEach(id=>$(id).addEventListener("input",render));
 $("copy").addEventListener("click",()=>{const t=$("prompt").textContent;
-  navigator.clipboard.writeText(t).then(()=>{$("copyMsg").textContent="Prompt copié."}).catch(()=>{const s=window.getSelection(),r=document.createRange();r.selectNodeContents($("prompt"));s.removeAllRanges();s.addRange(r);$("copyMsg").textContent="Texte sélectionné, fais Copier."})});
+  navigator.clipboard.writeText(t).then(()=>{$("copyMsg").textContent="Prompt copié."}).catch(()=>{
+    const a=document.createElement("textarea");a.value=t;a.style.cssText="position:fixed;opacity:0";document.body.appendChild(a);a.select();
+    let ok=false;try{ok=document.execCommand("copy")}catch(e){}a.remove();
+    $("copyMsg").textContent=ok?"Prompt copié.":"Copie impossible : ton navigateur la bloque."})});
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{themeChart();chart.update()});
 new MutationObserver(()=>{themeChart();chart.update()}).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
 
